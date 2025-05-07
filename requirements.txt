@@ -1,0 +1,10 @@
+flask 
+pandas
+numpy
+catboost
+shap
+waitress
+scikit-learn
+joblib
+scipy
+

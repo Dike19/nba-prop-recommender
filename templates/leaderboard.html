@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard{% endblock %}
+{% block content %}
+<div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold text-blue-400 mb-6">Leaderboard</h1>
+
+    <!-- Tabs Navigation -->
+    <div class="border-b border-gray-600">
+        <ul class="flex space-x-4">
+            <li>
+                <button
+                    class="tab-button px-4 py-2 text-blue-400 border-b-2 border-transparent hover:border-blue-400 focus:outline-none active-tab"
+                    data-tab="points">Points</button>
+            </li>
+            <li>
+                <button
+                    class="tab-button px-4 py-2 text-blue-400 border-b-2 border-transparent hover:border-blue-400 focus:outline-none"
+                    data-tab="rebounds">Rebounds</button>
+            </li>
+            <li>
+                <button
+                    class="tab-button px-4 py-2 text-blue-400 border-b-2 border-transparent hover:border-blue-400 focus:outline-none"
+                    data-tab="assists">Assists</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tabs Content -->
+    <div class="tab-content mt-4">
+        <!-- Points Leaderboard -->
+        <div id="points" class="tab-pane active">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-blue-800 text-white">
+                        <th class="p-3">Rank</th>
+                        <th class="p-3">Player</th>
+                        <th class="p-3">Team</th>
+                        <th class="p-3">Points</th>
+                        <th class="p-3">Rebounds</th>
+                        <th class="p-3">Assists</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in points_leaderboard %}
+                    <tr
+                        class="{% if loop.index % 2 == 0 %}bg-gray-700{% else %}bg-gray-600{% endif %} hover:bg-gray-500">
+                        <td class="p-3">{{ loop.index }}</td>
+                        <td class="p-3">
+                            <div class="flex items-center">
+                                <img src="{{ url_for('static', filename='players/' + player.Player + '.png') }}"
+                                    alt="{{ player.Player }} Image"
+                                    class="w-10 h-10 rounded-full mr-2 object-cover bg-white"
+                                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='players/blank_avatar.png') }}';">
+                                {{ player.Player }}
+                            </div>
+                        </td>
+                        <td class="p-3 flex items-center">
+                            <img src="/static/teams/{{ player.Tm }}.png" alt="{{ player.Tm }} Logo"
+                                class="w-6 h-6 mr-2 object-cover">
+                            {{ player.Tm }}
+                        </td>
+                        <td class="p-3">{{ player.PTS|round(1) }}</td>
+                        <td class="p-3">{{ player.TRB|round(1) }}</td>
+                        <td class="p-3">{{ player.AST|round(1)|default(0) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Rebounds Leaderboard -->
+        <div id="rebounds" class="tab-pane hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-blue-800 text-white">
+                        <th class="p-3">Rank</th>
+                        <th class="p-3">Player</th>
+                        <th class="p-3">Team</th>
+                        <th class="p-3">Points</th>
+                        <th class="p-3">Rebounds</th>
+                        <th class="p-3">Assists</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in rebounds_leaderboard %}
+                    <tr
+                        class="{% if loop.index % 2 == 0 %}bg-gray-700{% else %}bg-gray-600{% endif %} hover:bg-gray-500">
+                        <td class="p-3">{{ loop.index }}</td>
+                        <td class="p-3">
+                            <div class="flex items-center">
+                                <img src="{{ url_for('static', filename='players/' + player.Player + '.png') }}"
+                                    alt="{{ player.Player }} Image"
+                                    class="w-10 h-10 rounded-full mr-2 object-cover bg-white"
+                                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='players/blank_avatar.png') }}';">
+                                {{ player.Player }}
+                            </div>
+                        <td class="p-3 flex items-center">
+                            <img src="/static/teams/{{ player.Tm }}.png" alt="{{ player.Tm }} Logo"
+                                class="w-6 h-6 mr-2 object-cover">
+                            {{ player.Tm }}
+                        </td>
+                        <td class="p-3">{{ player.PTS|round(1) }}</td>
+                        <td class="p-3">{{ player.TRB|round(1) }}</td>
+                        <td class="p-3">{{ player.AST|round(1)|default(0) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Assists Leaderboard -->
+        <div id="assists" class="tab-pane hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-blue-800 text-white">
+                        <th class="p-3">Rank</th>
+                        <th class="p-3">Player</th>
+                        <th class="p-3">Team</th>
+                        <th class="p-3">Points</th>
+                        <th class="p-3">Rebounds</th>
+                        <th class="p-3">Assists</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in assists_leaderboard %}
+                    <tr
+                        class="{% if loop.index % 2 == 0 %}bg-gray-700{% else %}bg-gray-600{% endif %} hover:bg-gray-500">
+                        <td class="p-3">{{ loop.index }}</td>
+                        <td class="p-3">
+                            <div class="flex items-center">
+                                <img src="{{ url_for('static', filename='players/' + player.Player + '.png') }}"
+                                    alt="{{ player.Player }} Image"
+                                    class="w-10 h-10 rounded-full mr-2 object-cover bg-white"
+                                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='players/blank_avatar.png') }}';">
+                                {{ player.Player }}
+                            </div>
+                        </td>
+                        <td class="p-3 flex items-center">
+                            <img src="/static/teams/{{ player.Tm }}.png" alt="{{ player.Tm }} Logo"
+                                class="w-6 h-6 mr-2 object-cover">
+                            {{ player.Tm }}
+                        </td>
+                        <td class="p-3">{{ player.PTS|round(1) }}</td>
+                        <td class="p-3">{{ player.TRB|round(1) }}</td>
+                        <td class="p-3">{{ player.AST|round(1)|default(0) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching logic
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons and panes
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('border-blue-400', 'active-tab');
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+
+            // Add active class to clicked button and show corresponding pane
+            button.classList.add('border-blue-400', 'active-tab');
+            const tabId = button.getAttribute('data-tab');
+            document.getElementById(tabId).classList.remove('hidden');
+        });
+    });
+</script>
+{% endblock %}

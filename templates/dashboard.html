@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Prediction Form Card -->
+    <div class="lg:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold text-blue-400 mb-6">Make a Prediction</h1>
+        <form method="POST" action="{{ url_for('dashboard') }}" class="space-y-4">
+            <!-- Player Selection -->
+            <div>
+                <label class="block text-gray-300 font-semibold">Player</label>
+                <select name="player" id="player-select" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required onchange="updateTeam()">
+                    <option value="" disabled selected>Select a player</option>
+                    {% for player in players %}
+                        <option value="{{ player }}" data-team="{{ player_teams[player] }}">{{ player }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Team (Auto-populated, Disabled) -->
+            <div>
+                <label class="block text-gray-300 font-semibold">Team</label>
+                <input type="text" name="team" id="team-input" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" readonly required>
+            </div>
+            <!-- Opponent Selection -->
+            <div>
+                <label class="block text-gray-300 font-semibold">Opponent</label>
+                <select name="opponent" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
+                    <option value="" disabled selected>Select an opponent</option>
+                    {% for team in teams %}
+                        <option value="{{ team }}">{{ team }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Points Selection (Optional) -->
+            <div>
+                <label class="block text-gray-300 font-semibold">Points Threshold (Optional)</label>
+                <div class="flex space-x-2">
+                    <select name="points_threshold" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded text-white">
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="25+">25+</option>
+                    </select>
+                    <input type="number" name="points_custom" placeholder="Custom" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded text-white" min="0" step="1">
+                </div>
+            </div>
+            <!-- Rebounds Selection (Optional) -->
+            <div>
+                <label class="block text-gray-300 font-semibold">Rebounds Threshold (Optional)</label>
+                <div class="flex space-x-2">
+                    <select name="rebounds_threshold" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded text-white">
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                        <option value="7">7</option>
+                        <option value="10">10</option>
+                    </select>
+                    <input type="number" name="rebounds_custom" placeholder="Custom" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded text-white" min="0" step="1">
+                </div>
+            </div>
+            <!-- Assists Selection (Optional) -->
+            <div>
+                <label class="block text-gray-300 font-semibold">Assists Threshold (Optional)</label>
+                <div class="flex space-x-2">
+                    <select name="assists_threshold" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded text-white">
+                        <option value="3">3</option>
+                        <option value="5">5</option>
+                        <option value="7">7</option>
+                        <option value="10">10</option>
+                    </select>
+                    <input type="number" name="assists_custom" placeholder="Custom" class="w-1/2 p-2 bg-gray-700 border border-gray-600 rounded text-white" min="0" step="1">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-blue-800 text-white p-2 rounded hover:bg-blue-900">Predict</button>
+        </form>
+    </div>
+    <!-- Results Card -->
+    {% if predictions %}
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold text-blue-400 mb-4">Prediction Results</h2>
+        <div class="flex items-center mb-4">
+            <img src="{{ url_for('static', filename='players/' + user_inputs.player + '.png') }}" 
+                 alt="{{ user_inputs.player }} Image" 
+                 class="w-20 h-20 rounded-full mr-4 object-cover bg-white" 
+                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='players/blank_avatar.png') }}';">
+            <div>
+                <p class="text-lg font-bold">{{ user_inputs.player }}</p>
+                <div class="flex items-center">
+                    <img src="/static/teams/{{ user_inputs.team }}.png" alt="{{ user_inputs.team }} Logo" class="w-6 h-6 mr-2 object-cover" 
+                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='teams/default_logo.png') }}';">
+                    <p>{{ user_inputs.team }} vs</p>
+                    <img src="/static/teams/{{ user_inputs.opponent }}.png" alt="{{ user_inputs.opponent }} Logo" class="w-6 h-6 mx-2 object-cover" 
+                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='teams/default_logo.png') }}';">
+                    <p>{{ user_inputs.opponent }}</p>
+                </div>
+            </div>
+        </div>
+        <ul class="space-y-2">
+            <li class="flex justify-between">
+                <span>Points (≥{{ user_inputs.points_threshold|default('10') }}): </span>
+                <span class="text-blue-400">{{ predictions.points if predictions.points is not none else 'N/A' }}%</span>
+            </li>
+            <li class="flex justify-between">
+                <span>Rebounds (≥{{ user_inputs.rebounds_threshold|default('3') }}): </span>
+                <span class="text-blue-400">{{ predictions.rebounds if predictions.rebounds is not none else 'N/A' }}%</span>
+            </li>
+            <li class="flex justify-between">
+                <span>Assists (≥{{ user_inputs.assists_threshold|default('3') }}): </span>
+                <span class="text-blue-400">{{ predictions.assists if predictions.assists is not none else 'N/A' }}%</span>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+    {% if error %}
+        <div class="bg-red-600 p-4 rounded-lg text-white">{{ error }}</div>
+    {% endif %}
+</div>
+
+<script>
+function updateTeam() {
+    const playerSelect = document.getElementById('player-select');
+    const teamInput = document.getElementById('team-input');
+    const selectedOption = playerSelect.options[playerSelect.selectedIndex];
+    const team = selectedOption.getAttribute('data-team');
+    teamInput.value = team || '';
+}
+</script>
+{% endblock %}

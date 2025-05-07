@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Player Comparison{% endblock %}
+{% block content %}
+<div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold text-blue-400 mb-6">Player Comparison</h1>
+    <form method="POST" action="{{ url_for('player_comparison') }}" class="space-y-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-gray-300 font-semibold">Player 1</label>
+                <select name="player1" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
+                    <option value="" disabled selected>Select Player 1</option>
+                    {% for player in players %}
+                        <option value="{{ player }}">{{ player }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-300 font-semibold">Player 2</label>
+                <select name="player2" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required>
+                    <option value="" disabled selected>Select Player 2</option>
+                    {% for player in players %}
+                        <option value="{{ player }}">{{ player }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="w-full bg-blue-800 text-white p-2 rounded hover:bg-blue-900">Compare</button>
+    </form>
+    
+    {% if comparison_data %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for key, data in comparison_data.items() %}
+        <div class="bg-gray-700 p-4 rounded-lg">
+            <div class="flex items-center mb-4">
+                <img src="{{ url_for('static', filename='players/' + data.Player + '.png') }}" 
+                     alt="{{ data.Player }} Image" 
+                     class="w-20 h-20 rounded-full mr-3 object-cover bg-white" 
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='players/blank_avatar.png') }}';">
+                <div>
+                    <h2 class="text-lg font-bold text-blue-400">{{ data.Player }}</h2>
+                    <div class="flex items-center">
+                        <img src="/static/teams/{{ data.Tm }}.png" alt="{{ data.Tm }} Logo" class="w-6 h-6 mr-2 object-cover">
+                        <p>{{ data.Tm }}</p>
+                    </div>
+                </div>
+            </div>
+            <ul class="space-y-2">
+                <li class="flex justify-between">
+                    <span>Points:</span>
+                    <span class="text-blue-400">{{ data.PTS|round(1) }}</span>
+                </li>
+                <li class="flex justify-between">
+                    <span>Rebounds:</span>
+                    <span class="text-blue-400">{{ data.TRB|round(1) }}</span>
+                </li>
+                <li class="flex justify-between">
+                    <span>Assists:</span>
+                    <span class="text-blue-400">{{ data.AST|round(1) }}</span>
+                </li>
+                <li class="flex justify-between">
+                    <span>FG%:</span>
+                    <span class="text-blue-400">{{ data['FG%']|round(1) }}</span>
+                </li>
+                <li class="flex justify-between">
+                    <span>3PA:</span>
+                    <span class="text-blue-400">{{ data['3PA']|round(1) }}</span>
+                </li>
+                <li class="flex justify-between">
+                    <span>FTA:</span>
+                    <span class="text-blue-400">{{ data.FTA|round(1) }}</span>
+                </li>
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
