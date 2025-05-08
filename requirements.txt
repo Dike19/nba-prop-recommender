@@ -7,4 +7,4 @@ waitress
 scikit-learn
 joblib
 scipy
-
+werkzeug

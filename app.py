@@ -6,6 +6,8 @@ import logging
 import os
 import numpy as np
 from scipy.stats import norm
+from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # Replace with a secure key
@@ -95,22 +97,62 @@ def estimate_probability(predicted_value, threshold, historical_std, default_std
     prob = 1 - norm.cdf(threshold, loc=predicted_value, scale=std)
     return round(prob * 100, 2)
 
+# Initialize SQLite database for users
+def init_db():
+    with sqlite3.connect('users.db') as conn:
+        conn.execute('''CREATE TABLE IF NOT EXISTS users
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                         username TEXT UNIQUE NOT NULL,
+                         password TEXT NOT NULL)''')
+        conn.commit()
+
+init_db()
+
 @app.route('/')
 def home():
     if 'logged_in' in session:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    return render_template('login.html', show_signup=True)
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Hash the password for security
+        hashed_password = generate_password_hash(password)
+        
+        try:
+            with sqlite3.connect('users.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+                conn.commit()
+                logger.info(f"User {username} signed up successfully")
+                return redirect(url_for('login'))
+        except sqlite3.IntegrityError:
+            logger.error(f"Username {username} already exists")
+            return render_template('signup.html', error='Username already exists')
+    
+    return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username == 'admin' and password == 'password':
-            session['logged_in'] = True
-            return redirect(url_for('dashboard'))
-        else:
-            return render_template('login.html', error='Invalid credentials')
+        
+        with sqlite3.connect('users.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
+            result = cursor.fetchone()
+            
+            if result and check_password_hash(result[0], password):
+                session['logged_in'] = True
+                return redirect(url_for('dashboard'))
+            else:
+                return render_template('login.html', error='Invalid credentials')
+    
     return render_template('login.html')
 
 @app.route('/dashboard', methods=['GET', 'POST'])
