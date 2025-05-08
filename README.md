@@ -1,7 +1,5 @@
 # nba-prop-recommender
 
-# Basketball Prediction
-
 ## Introduction
 Welcome to the Basketball Prediction Dashboard, a Flask-based web application designed to predict the likelihood of NBA players exceeding specific statistical thresholds (Points, Rebounds, Assists) in upcoming games. Powered by machine learning models (CatBoost), this app leverages historical data from the 2024-25 season to provide insightful predictions. Whether you're a fan, analyst, or bettor, this tool helps you make informed decisions based on player performance trends.
 
